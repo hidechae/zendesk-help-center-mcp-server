@@ -76,9 +76,22 @@ Get details of a specific Zendesk Help Center article by ID.
 
 ## Using with Claude Desktop
 
-1. Start the MCP server as described above
-2. In Claude Desktop, add this server as a tool
-3. You can now use the Zendesk Help Center tools within Claude
+### Adding to Claude's `mcpServers` Configuration
+
+Add the following configuration to the `mcpServers` section in Claude's settings file:
+
+```json
+{
+  "mcpServers": {
+    "zendeskHelpCenter": {
+      "command": "npx",
+      "args": ["-y", "github:hidechae/zendesk-help-center-mcp-server"]
+    }
+  }
+}
+```
+
+After adding this configuration, you can use the Zendesk Help Center tools within Claude.
 
 ## Development
 
