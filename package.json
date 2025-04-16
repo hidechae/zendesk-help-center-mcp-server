@@ -1,9 +1,10 @@
 {
-  "name": "zendesk-help-center-mcp-client",
+  "name": "zendesk-help-center-mcp-server",
   "version": "1.0.0",
-  "description": "Zendesk Help Center MCP Client",
+  "description": "Zendesk Help Center MCP Server",
   "type": "module",
   "main": "build/index.js",
+  "bin": "build/index.js",
   "scripts": {
     "build": "tsc",
     "start": "node build/index.js",
