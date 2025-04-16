@@ -9,7 +9,7 @@ A Model Context Protocol (MCP) server that interfaces with the Zendesk Help Cent
 
 ## Prerequisites
 
-- Node.js (v14 or higher)
+- Node.js (v18 or higher)
 - A Zendesk account with API access
 - Zendesk API token
 
