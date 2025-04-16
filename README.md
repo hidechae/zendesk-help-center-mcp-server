@@ -85,7 +85,12 @@ Add the following configuration to the `mcpServers` section in Claude's settings
   "mcpServers": {
     "zendeskHelpCenter": {
       "command": "npx",
-      "args": ["-y", "github:hidechae/zendesk-help-center-mcp-server"]
+      "args": ["-y", "github:hidechae/zendesk-help-center-mcp-server"],
+      "env": {
+        "ZENDESK_SUBDOMAIN": "your-subdomain",
+        "ZENDESK_EMAIL": "your-email@example.com",
+        "ZENDESK_API_TOKEN": "your-api-token"
+      }
     }
   }
 }
