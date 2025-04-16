@@ -1,10 +1,7 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import axios from "axios";
-import {
-  CallToolResultSchema,
-  ListToolsResultSchema,
-} from "@modelcontextprotocol/sdk/types.js";
+import { CallToolResultSchema, ListToolsResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import * as readline from "node:readline";
 
 // Zendesk configuration interface
@@ -49,20 +46,17 @@ export class ZendeskHelpCenterClient {
       },
       {
         capabilities: {},
-      }
+      },
     );
 
     await this.client.connect(this.transport);
 
     // List available tools
-    const response = await this.client.request(
-      { method: "tools/list" },
-      ListToolsResultSchema
-    );
+    const response = await this.client.request({ method: "tools/list" }, ListToolsResultSchema);
 
     console.log(
       "\nAvailable tools:",
-      response.tools.map((tool: any) => tool.name)
+      response.tools.map((tool) => tool.name),
     );
   }
 
@@ -72,20 +66,22 @@ export class ZendeskHelpCenterClient {
     locale?: string;
     page?: number;
     per_page?: number;
-  }): Promise<any> {
+  }): Promise<{
+    results: Array<Record<string, unknown>>;
+    count: number;
+    next_page?: string;
+    previous_page?: string;
+  }> {
     const { query, locale = "en", page = 1, per_page = 20 } = params;
 
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/articles/search.json`,
-        {
-          params: { query, locale, page, per_page },
-          auth: {
-            username: `${this.zendeskConfig.email}/token`,
-            password: this.zendeskConfig.apiToken,
-          },
-        }
-      );
+      const response = await axios.get(`${this.baseUrl}/articles/search.json`, {
+        params: { query, locale, page, per_page },
+        auth: {
+          username: `${this.zendeskConfig.email}/token`,
+          password: this.zendeskConfig.apiToken,
+        },
+      });
 
       return response.data;
     } catch (error) {
@@ -95,20 +91,19 @@ export class ZendeskHelpCenterClient {
   }
 
   // Tool to get article details
-  async getArticle(params: { id: number; locale?: string }): Promise<any> {
+  async getArticle(params: { id: number; locale?: string }): Promise<{
+    article: Record<string, unknown>;
+  }> {
     const { id, locale = "en" } = params;
 
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/articles/${id}.json`,
-        {
-          params: { locale },
-          auth: {
-            username: `${this.zendeskConfig.email}/token`,
-            password: this.zendeskConfig.apiToken,
-          },
-        }
-      );
+      const response = await axios.get(`${this.baseUrl}/articles/${id}.json`, {
+        params: { locale },
+        auth: {
+          username: `${this.zendeskConfig.email}/token`,
+          password: this.zendeskConfig.apiToken,
+        },
+      });
 
       return response.data;
     } catch (error) {
@@ -148,8 +143,8 @@ export class ZendeskHelpCenterClient {
             } else {
               const query = parts[1];
               const locale = parts[2] || "en";
-              const page = parseInt(parts[3]) || 1;
-              const per_page = parseInt(parts[4]) || 20;
+              const page = Number.parseInt(parts[3]) || 1;
+              const per_page = Number.parseInt(parts[4]) || 20;
 
               const results = await this.searchArticles({
                 query,
@@ -163,7 +158,7 @@ export class ZendeskHelpCenterClient {
             if (parts.length < 2) {
               console.log("Usage: article <articleID> [locale]");
             } else {
-              const id = parseInt(parts[1]);
+              const id = Number.parseInt(parts[1]);
               const locale = parts[2] || "en";
 
               const article = await this.getArticle({ id, locale });

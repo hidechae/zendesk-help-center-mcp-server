@@ -20,7 +20,10 @@ if (!subdomain || !email || !apiToken) {
 const baseUrl = `https://${subdomain}.zendesk.com/api/v2/help_center`;
 
 // Helper function for Zendesk API requests
-async function makeZendeskRequest<T>(url: string, params: Record<string, any> = {}): Promise<T> {
+async function makeZendeskRequest<T>(
+  url: string,
+  params: Record<string, string | number | boolean> = {},
+): Promise<T> {
   try {
     const response = await axios.get(url, {
       params,
@@ -56,7 +59,7 @@ server.tool(
     try {
       const searchUrl = `${baseUrl}/articles/search.json`;
       const data = await makeZendeskRequest(searchUrl, { query, locale, page, per_page });
-      
+
       return {
         content: [
           {
@@ -90,7 +93,7 @@ server.tool(
     try {
       const articleUrl = `${baseUrl}/articles/${id}.json`;
       const data = await makeZendeskRequest(articleUrl, { locale });
-      
+
       return {
         content: [
           {
