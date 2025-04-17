@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "Zendesk Help Center MCP Server",
   "type": "module",
-  "main": "build/index.js",
-  "bin": "build/index.js",
+  "main": "dist/index.js",
+  "bin": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node build/index.js",
+    "start": "node dist/index.js",
     "lint": "biome lint .",
     "format": "biome format . --write",
     "check": "biome check --apply ."
