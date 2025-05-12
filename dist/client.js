@@ -3,6 +3,8 @@ import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js"
 import axios from "axios";
 import { ListToolsResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import * as readline from "node:readline";
+// Get default locale from environment variable or fallback to "en"
+const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || "en";
 // MCP client class
 export class ZendeskHelpCenterClient {
     client = null;
@@ -38,7 +40,7 @@ export class ZendeskHelpCenterClient {
     }
     // Tool to search Zendesk articles
     async searchArticles(params) {
-        const { query, locale = "en", page = 1, per_page = 20 } = params;
+        const { query, locale = DEFAULT_LOCALE, page = 1, per_page = 20 } = params;
         try {
             const response = await axios.get(`${this.baseUrl}/articles/search.json`, {
                 params: { query, locale, page, per_page },
@@ -56,7 +58,7 @@ export class ZendeskHelpCenterClient {
     }
     // Tool to get article details
     async getArticle(params) {
-        const { id, locale = "en" } = params;
+        const { id, locale = DEFAULT_LOCALE } = params;
         try {
             const response = await axios.get(`${this.baseUrl}/articles/${id}.json`, {
                 params: { locale },
@@ -99,7 +101,7 @@ export class ZendeskHelpCenterClient {
                         }
                         else {
                             const query = parts[1];
-                            const locale = parts[2] || "en";
+                            const locale = parts[2] || DEFAULT_LOCALE;
                             const page = Number.parseInt(parts[3]) || 1;
                             const per_page = Number.parseInt(parts[4]) || 20;
                             const results = await this.searchArticles({
@@ -117,7 +119,7 @@ export class ZendeskHelpCenterClient {
                         }
                         else {
                             const id = Number.parseInt(parts[1]);
-                            const locale = parts[2] || "en";
+                            const locale = parts[2] || DEFAULT_LOCALE;
                             const article = await this.getArticle({ id, locale });
                             console.log(JSON.stringify(article, null, 2));
                         }

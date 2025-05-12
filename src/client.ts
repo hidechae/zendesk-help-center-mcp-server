@@ -4,6 +4,9 @@ import axios from "axios";
 import { CallToolResultSchema, ListToolsResultSchema } from "@modelcontextprotocol/sdk/types.js";
 import * as readline from "node:readline";
 
+// Get default locale from environment variable or fallback to "en"
+const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || "en";
+
 // Zendesk configuration interface
 export interface ZendeskConfig {
   subdomain: string;
@@ -72,7 +75,7 @@ export class ZendeskHelpCenterClient {
     next_page?: string;
     previous_page?: string;
   }> {
-    const { query, locale = "en", page = 1, per_page = 20 } = params;
+    const { query, locale = DEFAULT_LOCALE, page = 1, per_page = 20 } = params;
 
     try {
       const response = await axios.get(`${this.baseUrl}/articles/search.json`, {
@@ -94,7 +97,7 @@ export class ZendeskHelpCenterClient {
   async getArticle(params: { id: number; locale?: string }): Promise<{
     article: Record<string, unknown>;
   }> {
-    const { id, locale = "en" } = params;
+    const { id, locale = DEFAULT_LOCALE } = params;
 
     try {
       const response = await axios.get(`${this.baseUrl}/articles/${id}.json`, {
@@ -142,7 +145,7 @@ export class ZendeskHelpCenterClient {
               console.log("Usage: search <keyword> [locale] [page] [per_page]");
             } else {
               const query = parts[1];
-              const locale = parts[2] || "en";
+              const locale = parts[2] || DEFAULT_LOCALE;
               const page = Number.parseInt(parts[3]) || 1;
               const per_page = Number.parseInt(parts[4]) || 20;
 
@@ -159,8 +162,7 @@ export class ZendeskHelpCenterClient {
               console.log("Usage: article <articleID> [locale]");
             } else {
               const id = Number.parseInt(parts[1]);
-              const locale = parts[2] || "en";
-
+              const locale = parts[2] || DEFAULT_LOCALE;
               const article = await this.getArticle({ id, locale });
               console.log(JSON.stringify(article, null, 2));
             }
