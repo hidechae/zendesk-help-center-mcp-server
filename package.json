@@ -11,7 +11,14 @@
     "debug": "tsc-watch --onSuccess \"node dist/debug-cli.js\"",
     "lint": "biome lint .",
     "format": "biome format . --write",
-    "check": "biome check --apply ."
+    "check": "biome check --apply .",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.{js,ts}": [
+      "biome check --apply",
+      "npm run build"
+    ]
   },
   "keywords": [
     "mcp",
@@ -30,6 +37,8 @@
   "devDependencies": {
     "@biomejs/biome": "^1.5.3",
     "@types/node": "^22.14.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.0.0",
     "tsc-watch": "^6.2.1",
     "typescript": "^5.8.3"
   },
