@@ -6,7 +6,7 @@
   "main": "dist/index.js",
   "bin": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc --project tsconfig.json",
     "start": "node dist/index.js",
     "debug": "tsc-watch --onSuccess \"node dist/debug-cli.js\"",
     "lint": "biome lint .",
@@ -15,16 +15,9 @@
     "prepare": "husky install"
   },
   "lint-staged": {
-    "*.{js,ts}": [
-      "biome check --apply",
-      "npm run build"
-    ]
+    "src/**/*.ts": ["npm run check"]
   },
-  "keywords": [
-    "mcp",
-    "zendesk",
-    "help-center"
-  ],
+  "keywords": ["mcp", "zendesk", "help-center"],
   "author": "",
   "license": "MIT",
   "dependencies": {

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { ZendeskHelpCenterClient, ZendeskConfig } from "./client.js";
 import dotenv from "dotenv";
+import { type ZendeskConfig, ZendeskHelpCenterClient } from "./client.js";
 
 // Load environment variables
 dotenv.config();
@@ -22,7 +22,7 @@ if (!zendeskConfig.subdomain || !zendeskConfig.email || !zendeskConfig.apiToken)
 // Create client and start chat loop
 async function main() {
   const client = new ZendeskHelpCenterClient(zendeskConfig);
-  
+
   try {
     // Start the chat loop directly without connecting to server
     await client.chatLoop();

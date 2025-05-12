@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import dotenv from "dotenv";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import axios from "axios";
+import dotenv from "dotenv";
 import { z } from "zod";
 
 // Load environment variables
@@ -22,6 +22,46 @@ if (!subdomain || !email || !apiToken) {
 }
 
 const baseUrl = `https://${subdomain}.zendesk.com/api/v2/help_center`;
+
+// Zendesk API response types
+interface ZendeskArticle {
+  id: number;
+  url: string;
+  html_url: string;
+  author_id: number;
+  comments_disabled: boolean;
+  draft: boolean;
+  promoted: boolean;
+  position: number;
+  vote_sum: number;
+  vote_count: number;
+  section_id: number;
+  created_at: string;
+  updated_at: string;
+  name: string;
+  title: string;
+  source_locale: string;
+  locale: string;
+  outdated: boolean;
+  outdated_locales: string[];
+  edited_at: string;
+  user_segment_id: number | null;
+  permission_group_id: number;
+  content_tag_ids: number[];
+  label_names: string[];
+  body?: string; // Make body optional so we can remove it
+}
+
+interface ZendeskSearchResponse {
+  results: ZendeskArticle[];
+  count: number;
+  next_page?: string;
+  previous_page?: string;
+}
+
+interface ZendeskArticleResponse {
+  article: ZendeskArticle;
+}
 
 // Helper function for Zendesk API requests
 async function makeZendeskRequest<T>(
@@ -62,7 +102,21 @@ server.tool(
   async ({ query, locale = DEFAULT_LOCALE, page = 1, per_page = 20 }) => {
     try {
       const searchUrl = `${baseUrl}/articles/search.json`;
-      const data = await makeZendeskRequest(searchUrl, { query, locale, page, per_page });
+      const data = await makeZendeskRequest<ZendeskSearchResponse>(searchUrl, {
+        query,
+        locale,
+        page,
+        per_page,
+      });
+
+      // Remove body field from results to reduce token size
+      if (data.results && Array.isArray(data.results)) {
+        data.results = data.results.map((article) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { body, ...rest } = article;
+          return rest;
+        });
+      }
 
       return {
         content: [
@@ -96,7 +150,7 @@ server.tool(
   async ({ id, locale = DEFAULT_LOCALE }) => {
     try {
       const articleUrl = `${baseUrl}/articles/${id}.json`;
-      const data = await makeZendeskRequest(articleUrl, { locale });
+      const data = await makeZendeskRequest<ZendeskArticleResponse>(articleUrl, { locale });
 
       return {
         content: [

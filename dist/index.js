@@ -1,8 +1,8 @@
 #!/usr/bin/env node
-import dotenv from "dotenv";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import axios from "axios";
+import dotenv from "dotenv";
 import { z } from "zod";
 // Load environment variables
 dotenv.config();
@@ -48,7 +48,20 @@ server.tool("searchArticles", "Search for articles in Zendesk Help Center", {
 }, async ({ query, locale = DEFAULT_LOCALE, page = 1, per_page = 20 }) => {
     try {
         const searchUrl = `${baseUrl}/articles/search.json`;
-        const data = await makeZendeskRequest(searchUrl, { query, locale, page, per_page });
+        const data = await makeZendeskRequest(searchUrl, {
+            query,
+            locale,
+            page,
+            per_page,
+        });
+        // Remove body field from results to reduce token size
+        if (data.results && Array.isArray(data.results)) {
+            data.results = data.results.map((article) => {
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                const { body, ...rest } = article;
+                return rest;
+            });
+        }
         return {
             content: [
                 {

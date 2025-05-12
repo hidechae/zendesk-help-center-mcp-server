@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { ZendeskHelpCenterClient } from "./client.js";
 import dotenv from "dotenv";
+import { ZendeskHelpCenterClient } from "./client.js";
 // Load environment variables
 dotenv.config();
 // Get Zendesk configuration from environment variables

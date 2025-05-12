@@ -1,8 +1,8 @@
+import * as readline from "node:readline";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import axios from "axios";
 import { CallToolResultSchema, ListToolsResultSchema } from "@modelcontextprotocol/sdk/types.js";
-import * as readline from "node:readline";
+import axios from "axios";
 
 // Get default locale from environment variable or fallback to "en"
 const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || "en";
@@ -86,7 +86,17 @@ export class ZendeskHelpCenterClient {
         },
       });
 
-      return response.data;
+      // Remove body field from results to reduce token size
+      const data = response.data;
+      if (data.results && Array.isArray(data.results)) {
+        data.results = data.results.map((article: Record<string, unknown>) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { body, ...rest } = article;
+          return rest;
+        });
+      }
+
+      return data;
     } catch (error) {
       console.error("Search error:", error);
       throw error;
@@ -108,7 +118,15 @@ export class ZendeskHelpCenterClient {
         },
       });
 
-      return response.data;
+      // Remove body field from article to reduce token size
+      const data = response.data;
+      if (data.article && typeof data.article === "object") {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { body, ...rest } = data.article;
+        data.article = rest;
+      }
+
+      return data;
     } catch (error) {
       console.error("Article retrieval error:", error);
       throw error;
