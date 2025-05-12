@@ -10,6 +10,8 @@ dotenv.config();
 const subdomain = process.env.ZENDESK_SUBDOMAIN || "";
 const email = process.env.ZENDESK_EMAIL || "";
 const apiToken = process.env.ZENDESK_API_TOKEN || "";
+// Get default locale from environment variable or fallback to "en"
+const DEFAULT_LOCALE = process.env.DEFAULT_LOCALE || "en";
 if (!subdomain || !email || !apiToken) {
     console.error("Environment variables are not set. Please check your .env file.");
     process.exit(1);
@@ -43,7 +45,7 @@ server.tool("searchArticles", "Search for articles in Zendesk Help Center", {
     locale: z.string().optional().describe("Locale code (e.g., 'ja', 'en-us')"),
     page: z.number().optional().describe("Page number"),
     per_page: z.number().optional().describe("Number of results per page (max 100)"),
-}, async ({ query, locale = "en", page = 1, per_page = 20 }) => {
+}, async ({ query, locale = DEFAULT_LOCALE, page = 1, per_page = 20 }) => {
     try {
         const searchUrl = `${baseUrl}/articles/search.json`;
         const data = await makeZendeskRequest(searchUrl, { query, locale, page, per_page });
@@ -71,7 +73,7 @@ server.tool("searchArticles", "Search for articles in Zendesk Help Center", {
 server.tool("getArticle", "Get details of a specific Zendesk Help Center article by ID", {
     id: z.number().describe("Article ID"),
     locale: z.string().optional().describe("Locale code (e.g., 'ja', 'en-us')"),
-}, async ({ id, locale = "en" }) => {
+}, async ({ id, locale = DEFAULT_LOCALE }) => {
     try {
         const articleUrl = `${baseUrl}/articles/${id}.json`;
         const data = await makeZendeskRequest(articleUrl, { locale });
