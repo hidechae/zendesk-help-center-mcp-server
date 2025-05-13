@@ -1,5 +1,5 @@
-import axios from "axios";
 import * as readline from "node:readline";
+import axios from "axios";
 // Zendesk API client class
 export class ZendeskClient {
     baseUrl;
@@ -29,7 +29,7 @@ export class ZendeskClient {
     }
     // Search for articles
     async searchArticles(params) {
-        const { query, locale = this.config.defaultLocale || "en", page = 1, per_page = 20 } = params;
+        const { query, locale = this.defaultLocale, page = 1, per_page = 20 } = params;
         const searchUrl = `${this.baseUrl}/articles/search.json`;
         const data = await this.makeRequest(searchUrl, {
             query,
@@ -37,12 +37,21 @@ export class ZendeskClient {
             page,
             per_page,
         });
-        // Remove body field from results to reduce token size
+        // Filter results to only include specified fields
         if (data.results && Array.isArray(data.results)) {
             data.results = data.results.map((article) => {
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                const { body, ...rest } = article;
-                return rest;
+                // Only keep the specified fields
+                const filteredArticle = {
+                    id: article.id,
+                    url: article.url,
+                    html_url: article.html_url,
+                    author_id: article.author_id,
+                    created_at: article.created_at,
+                    updated_at: article.updated_at,
+                    title: article.title,
+                    label_names: article.label_names
+                };
+                return filteredArticle;
             });
         }
         return data;
@@ -51,7 +60,23 @@ export class ZendeskClient {
     async getArticle(params) {
         const { id, locale = this.defaultLocale } = params;
         const articleUrl = `${this.baseUrl}/articles/${id}.json`;
-        return await this.makeRequest(articleUrl, { locale });
+        const data = await this.makeRequest(articleUrl, { locale });
+        // Filter article to only include specified fields
+        if (data.article) {
+            const filteredArticle = {
+                id: data.article.id,
+                url: data.article.url,
+                html_url: data.article.html_url,
+                author_id: data.article.author_id,
+                created_at: data.article.created_at,
+                updated_at: data.article.updated_at,
+                title: data.article.title,
+                label_names: data.article.label_names,
+                body: data.article.body
+            };
+            data.article = filteredArticle;
+        }
+        return data;
     }
     // Interactive chat loop
     async chatLoop() {
