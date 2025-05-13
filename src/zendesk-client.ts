@@ -81,6 +81,51 @@ export class ZendeskClient {
     }
   }
 
+  // Helper function to clean HTML content by removing empty tags and unnecessary attributes
+  private cleanHtmlContent(html: string | undefined): string | undefined {
+    if (!html) return html;
+
+    // 空のタグを削除する正規表現パターン
+    // <p> </p>, <p></p>, <h3> </h3>などの空のタグを削除
+    const emptyTagPattern = /<([a-z][a-z0-9]*)[^>]*>\s*<\/\1>/gi;
+
+    // 不要な属性を削除する正規表現パターン
+    const styleAttributePattern = /\s+style=["']([^"']*)["']/gi;
+    const idAttributePattern = /\s+id=["']([^"']*)["']/gi;
+    const classAttributePattern = /\s+class=["']([^"']*)["']/gi;
+    const targetAttributePattern = /\s+target=["']([^"']*)["']/gi;
+    const borderAttributePattern = /\s+border=["']([^"']*)["']/gi;
+
+    // 不要なタグを削除してテキストのみを残すパターン
+    const spanTagPattern = /<span[^>]*>([\s\S]*?)<\/span>/gi;
+    const fontTagPattern = /<font[^>]*>([\s\S]*?)<\/font>/gi;
+
+    // 連続した空白行を削除
+    const multipleLineBreaksPattern = /\n\s*\n/g;
+
+    // 空のタグを削除
+    let cleanedHtml = html.replace(emptyTagPattern, "");
+
+    // 不要な属性を削除
+    cleanedHtml = cleanedHtml.replace(styleAttributePattern, "");
+    cleanedHtml = cleanedHtml.replace(idAttributePattern, "");
+    cleanedHtml = cleanedHtml.replace(classAttributePattern, "");
+    cleanedHtml = cleanedHtml.replace(targetAttributePattern, "");
+    cleanedHtml = cleanedHtml.replace(borderAttributePattern, "");
+
+    // 不要なタグを削除してテキストのみを残す
+    cleanedHtml = cleanedHtml.replace(spanTagPattern, "$1");
+    cleanedHtml = cleanedHtml.replace(fontTagPattern, "$1");
+
+    // 連続した空白行を1つの改行に置換
+    cleanedHtml = cleanedHtml.replace(multipleLineBreaksPattern, "\n");
+
+    // テーブルのセル内の余分な改行を削除
+    cleanedHtml = cleanedHtml.replace(/<td>\s*<p>(.*?)<\/p>\s*<\/td>/gi, "<td>$1</td>");
+
+    return cleanedHtml;
+  }
+
   // Search for articles
   async searchArticles(params: {
     query: string;
@@ -140,7 +185,7 @@ export class ZendeskClient {
         updated_at: data.article.updated_at,
         title: data.article.title,
         label_names: data.article.label_names,
-        body: data.article.body,
+        body: this.cleanHtmlContent(data.article.body),
       };
 
       data.article = filteredArticle as ZendeskArticle;
